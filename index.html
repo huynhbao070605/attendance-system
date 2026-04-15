@@ -128,11 +128,6 @@
       resize: vertical;
     }
 
-    .readonly {
-      background: #f8fafc;
-      color: #475569;
-    }
-
     .hint {
       font-size: 12px;
       color: var(--muted);
@@ -147,6 +142,17 @@
       margin-bottom: 20px;
       font-size: 14px;
       color: #334155;
+    }
+
+    .notice {
+      margin-bottom: 20px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      border: 1px solid #bfdbfe;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .actions {
@@ -236,6 +242,10 @@
       </div>
 
       <div class="form-body">
+        <div class="notice">
+          Khi bấm <b>Gửi yêu cầu</b>, hệ thống sẽ chuyển sang form chính thức của công ty để lưu dữ liệu và gửi email duyệt.
+        </div>
+
         <form id="gatePassForm">
           <h2 class="section-title">1. Thông tin nhân viên</h2>
 
@@ -287,14 +297,14 @@
           <div class="grid">
             <div class="field" id="outTimeField">
               <label for="outTime" id="outTimeLabel">Giờ ra cổng</label>
-              <input type="time" id="outTime" name="outTime" />
-              <div class="hint">Dùng cho trường hợp về sớm hoặc ra ngoài rồi quay lại</div>
+              <input type="time" id="outTime" name="outTime" step="60" />
+              <div class="hint">Nhập theo giờ 24h, ví dụ: 08:30 hoặc 17:45</div>
             </div>
 
             <div class="field" id="inTimeField">
               <label for="inTime" id="inTimeLabel">Giờ vào cổng</label>
-              <input type="time" id="inTime" name="inTime" />
-              <div class="hint">Dùng cho trường hợp vào muộn hoặc ra ngoài rồi quay lại</div>
+              <input type="time" id="inTime" name="inTime" step="60" />
+              <div class="hint">Nhập theo giờ 24h, ví dụ: 09:00 hoặc 18:10</div>
             </div>
           </div>
 
@@ -328,6 +338,8 @@
   </div>
 
   <script>
+    const APPS_SCRIPT_FORM_URL = "DAN_LINK_APPS_SCRIPT_EXEC_CUA_BAN";
+
     const requestType = document.getElementById("requestType");
     const outTimeField = document.getElementById("outTimeField");
     const inTimeField = document.getElementById("inTimeField");
@@ -396,7 +408,6 @@
 
     function validateForm(data) {
       if (!data.employeeID.trim()) return "Vui lòng nhập mã nhân viên.";
-      if (!data.employeeEmail.trim()) return "Vui lòng nhập email nhân viên.";
       if (!data.fullName.trim()) return "Vui lòng nhập họ tên.";
       if (!data.department.trim()) return "Vui lòng nhập bộ phận.";
       if (!data.requestType) return "Vui lòng chọn loại yêu cầu.";
@@ -426,13 +437,9 @@
       return "";
     }
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      clearMessage();
-
-      const formData = {
+    function buildFormData() {
+      return {
         employeeID: document.getElementById("employeeID").value.trim(),
-        employeeEmail: document.getElementById("employeeEmail").value.trim(),
         fullName: document.getElementById("fullName").value.trim(),
         department: document.getElementById("department").value.trim(),
         requestType: document.getElementById("requestType").value,
@@ -441,19 +448,35 @@
         inTime: document.getElementById("inTime").value,
         reason: document.getElementById("reason").value.trim(),
         note: document.getElementById("note").value.trim(),
-        submittedBy: document.getElementById("employeeEmail").value.trim()
+        submittedBy: document.getElementById("employeeID").value.trim()
       };
+    }
 
-      const error = validateForm(formData);
-      if (error) {
-        showMessage("error", error);
+    function redirectToAppsScriptForm(formData) {
+      if (!APPS_SCRIPT_FORM_URL || APPS_SCRIPT_FORM_URL.includes("https://script.google.com/macros/s/AKfycbxjP1BoUeqv0T-1-RVaS8xQtOAp-zDZ_mQGdtrU6p1mefRfcExBTiAifgbzWPu2l28Q3Q/exec")) {
+        showMessage("error", "Bạn chưa cấu hình link Apps Script Web App trong file index.html.");
+        submitBtn.disabled = false;
+        form.classList.remove("loading");
         return;
       }
 
-      submitBtn.disabled = true;
-      form.classList.add("loading");
-      showMessage("success", "Đang gửi yêu cầu...");
+      const params = new URLSearchParams({
+        source: "github",
+        employeeID: formData.employeeID,
+        fullName: formData.fullName,
+        department: formData.department,
+        requestType: formData.requestType,
+        requestDate: formData.requestDate,
+        outTime: formData.outTime,
+        inTime: formData.inTime,
+        reason: formData.reason,
+        note: formData.note
+      });
 
+      window.location.href = APPS_SCRIPT_FORM_URL + "?" + params.toString();
+    }
+
+    function submitThroughAppsScript(formData) {
       google.script.run
         .withSuccessHandler(function (res) {
           submitBtn.disabled = false;
@@ -473,6 +496,29 @@
           showMessage("error", "Có lỗi xảy ra: " + err.message);
         })
         .submitGatePass(formData);
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      clearMessage();
+
+      const formData = buildFormData();
+      const error = validateForm(formData);
+
+      if (error) {
+        showMessage("error", error);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      form.classList.add("loading");
+      showMessage("success", "Đang xử lý yêu cầu...");
+
+      if (window.google && google.script && google.script.run) {
+        submitThroughAppsScript(formData);
+      } else {
+        redirectToAppsScriptForm(formData);
+      }
     });
 
     updateFormByType();
