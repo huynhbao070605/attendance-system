@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giấy ra vào cổng online</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --primary: #1d6ff2;
+      --primary-dark: #1557c0;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #dbe3ef;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1d6ff2, #4f8cff);
+      color: white;
+      padding: 24px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .header p {
+      margin: 0;
+      opacity: 0.95;
+      font-size: 14px;
+    }
+
+    .form-body {
+      padding: 24px;
+    }
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 18px;
+      color: var(--primary-dark);
+      border-left: 4px solid var(--primary);
+      padding-left: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .grid-1 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--danger);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+      transition: 0.2s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 111, 242, 0.12);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .readonly {
+      background: #f8fafc;
+      color: #475569;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: -2px;
+    }
+
+    .type-box {
+      padding: 14px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      background: #f8fbff;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #334155;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    .message {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.success {
+      display: block;
+      background: #ecfdf5;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .message.error {
+      display: block;
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <h1>Giấy ra vào cổng online</h1>
+        <p>Dành cho các trường hợp về sớm, vào muộn hoặc ra ngoài rồi quay lại</p>
+      </div>
+
+      <div class="form-body">
+        <form id="gatePassForm">
+          <h2 class="section-title">1. Thông tin nhân viên</h2>
+
+          <div class="grid">
+            <div class="field">
+              <label for="employeeID" class="required">Mã nhân viên</label>
+              <input type="text" id="employeeID" name="employeeID" placeholder="Ví dụ: 3191" required />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="field">
+              <label for="fullName" class="required">Họ và tên</label>
+              <input type="text" id="fullName" name="fullName" placeholder="Nhập họ tên" required />
+            </div>
+
+            <div class="field">
+              <label for="department" class="required">Bộ phận</label>
+              <input type="text" id="department" name="department" placeholder="Ví dụ: QC" required />
+            </div>
+          </div>
+
+          <h2 class="section-title">2. Thông tin yêu cầu</h2>
+
+          <div class="field">
+            <label for="requestType" class="required">Loại yêu cầu</label>
+            <select id="requestType" name="requestType" required>
+              <option value="">-- Chọn loại yêu cầu --</option>
+              <option value="EARLY_LEAVE">Về sớm</option>
+              <option value="LATE_ARRIVAL">Vào muộn</option>
+              <option value="OUT_AND_BACK">Ra ngoài rồi quay lại</option>
+            </select>
+          </div>
+
+          <div id="requestTypeNote" class="type-box hidden"></div>
+
+          <div class="grid">
+            <div class="field">
+              <label for="requestDate" class="required">Ngày áp dụng</label>
+              <input type="date" id="requestDate" name="requestDate" required />
+            </div>
+
+            <div class="field">
+              <label for="reason" class="required">Lý do</label>
+              <input type="text" id="reason" name="reason" placeholder="Ví dụ: Công tác, việc cá nhân, khám bệnh..." required />
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="field" id="outTimeField">
+              <label for="outTime" id="outTimeLabel">Giờ ra cổng</label>
+              <input type="time" id="outTime" name="outTime" />
+              <div class="hint">Dùng cho trường hợp về sớm hoặc ra ngoài rồi quay lại</div>
+            </div>
+
+            <div class="field" id="inTimeField">
+              <label for="inTime" id="inTimeLabel">Giờ vào cổng</label>
+              <input type="time" id="inTime" name="inTime" />
+              <div class="hint">Dùng cho trường hợp vào muộn hoặc ra ngoài rồi quay lại</div>
+            </div>
+          </div>
+
+          <div class="grid-1">
+            <div class="field">
+              <label for="note">Ghi chú thêm</label>
+              <textarea id="note" name="note" placeholder="Thông tin bổ sung nếu có..."></textarea>
+            </div>
+          </div>
+
+          <h2 class="section-title">3. Xác nhận</h2>
+
+          <div class="grid-1">
+            <div class="field">
+              <label>
+                <input type="checkbox" id="confirmCheck" required />
+                Tôi xác nhận các thông tin trên là đúng và đồng ý gửi yêu cầu duyệt.
+              </label>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn-secondary" onclick="resetForm()">Làm lại</button>
+            <button type="submit" class="btn-primary" id="submitBtn">Gửi yêu cầu</button>
+          </div>
+
+          <div id="messageBox" class="message"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const requestType = document.getElementById("requestType");
+    const outTimeField = document.getElementById("outTimeField");
+    const inTimeField = document.getElementById("inTimeField");
+    const outTime = document.getElementById("outTime");
+    const inTime = document.getElementById("inTime");
+    const outTimeLabel = document.getElementById("outTimeLabel");
+    const inTimeLabel = document.getElementById("inTimeLabel");
+    const requestTypeNote = document.getElementById("requestTypeNote");
+    const form = document.getElementById("gatePassForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const messageBox = document.getElementById("messageBox");
+
+    function updateFormByType() {
+      const type = requestType.value;
+
+      outTime.required = false;
+      inTime.required = false;
+      outTimeField.classList.remove("hidden");
+      inTimeField.classList.remove("hidden");
+      requestTypeNote.classList.add("hidden");
+
+      if (type === "EARLY_LEAVE") {
+        outTime.required = true;
+        inTime.value = "";
+        inTimeField.classList.add("hidden");
+        outTimeLabel.innerText = "Giờ ra cổng *";
+        requestTypeNote.innerText = "Trường hợp về sớm: nhân viên chỉ cần khai giờ ra cổng.";
+        requestTypeNote.classList.remove("hidden");
+      } else if (type === "LATE_ARRIVAL") {
+        inTime.required = true;
+        outTime.value = "";
+        outTimeField.classList.add("hidden");
+        inTimeLabel.innerText = "Giờ vào cổng *";
+        requestTypeNote.innerText = "Trường hợp vào muộn: nhân viên chỉ cần khai giờ vào cổng.";
+        requestTypeNote.classList.remove("hidden");
+      } else if (type === "OUT_AND_BACK") {
+        outTime.required = true;
+        inTime.required = true;
+        outTimeLabel.innerText = "Giờ ra cổng *";
+        inTimeLabel.innerText = "Giờ vào cổng *";
+        requestTypeNote.innerText = "Trường hợp ra ngoài rồi quay lại: nhân viên phải khai cả giờ ra và giờ vào dự kiến.";
+        requestTypeNote.classList.remove("hidden");
+      } else {
+        outTimeLabel.innerText = "Giờ ra cổng";
+        inTimeLabel.innerText = "Giờ vào cổng";
+      }
+    }
+
+    requestType.addEventListener("change", updateFormByType);
+
+    function showMessage(type, text) {
+      messageBox.className = "message " + type;
+      messageBox.innerText = text;
+    }
+
+    function clearMessage() {
+      messageBox.className = "message";
+      messageBox.innerText = "";
+    }
+
+    function resetForm() {
+      form.reset();
+      clearMessage();
+      updateFormByType();
+    }
+
+    function validateForm(data) {
+      if (!data.employeeID.trim()) return "Vui lòng nhập mã nhân viên.";
+      if (!data.employeeEmail.trim()) return "Vui lòng nhập email nhân viên.";
+      if (!data.fullName.trim()) return "Vui lòng nhập họ tên.";
+      if (!data.department.trim()) return "Vui lòng nhập bộ phận.";
+      if (!data.requestType) return "Vui lòng chọn loại yêu cầu.";
+      if (!data.requestDate) return "Vui lòng chọn ngày áp dụng.";
+      if (!data.reason.trim()) return "Vui lòng nhập lý do.";
+
+      if (data.requestType === "EARLY_LEAVE" && !data.outTime) {
+        return "Trường hợp về sớm phải nhập giờ ra cổng.";
+      }
+
+      if (data.requestType === "LATE_ARRIVAL" && !data.inTime) {
+        return "Trường hợp vào muộn phải nhập giờ vào cổng.";
+      }
+
+      if (data.requestType === "OUT_AND_BACK") {
+        if (!data.outTime) return "Vui lòng nhập giờ ra cổng.";
+        if (!data.inTime) return "Vui lòng nhập giờ vào cổng.";
+        if (data.outTime >= data.inTime) {
+          return "Giờ vào cổng phải lớn hơn giờ ra cổng.";
+        }
+      }
+
+      if (!document.getElementById("confirmCheck").checked) {
+        return "Bạn cần xác nhận thông tin trước khi gửi.";
+      }
+
+      return "";
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      clearMessage();
+
+      const formData = {
+        employeeID: document.getElementById("employeeID").value.trim(),
+        employeeEmail: document.getElementById("employeeEmail").value.trim(),
+        fullName: document.getElementById("fullName").value.trim(),
+        department: document.getElementById("department").value.trim(),
+        requestType: document.getElementById("requestType").value,
+        requestDate: document.getElementById("requestDate").value,
+        outTime: document.getElementById("outTime").value,
+        inTime: document.getElementById("inTime").value,
+        reason: document.getElementById("reason").value.trim(),
+        note: document.getElementById("note").value.trim(),
+        submittedBy: document.getElementById("employeeEmail").value.trim()
+      };
+
+      const error = validateForm(formData);
+      if (error) {
+        showMessage("error", error);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      form.classList.add("loading");
+      showMessage("success", "Đang gửi yêu cầu...");
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          submitBtn.disabled = false;
+          form.classList.remove("loading");
+
+          if (res && res.success) {
+            showMessage("success", res.message || "Đã gửi yêu cầu thành công.");
+            form.reset();
+            updateFormByType();
+          } else {
+            showMessage("error", (res && res.message) || "Gửi yêu cầu thất bại.");
+          }
+        })
+        .withFailureHandler(function (err) {
+          submitBtn.disabled = false;
+          form.classList.remove("loading");
+          showMessage("error", "Có lỗi xảy ra: " + err.message);
+        })
+        .submitGatePass(formData);
+    });
+
+    updateFormByType();
+  </script>
+</body>
+</html>
