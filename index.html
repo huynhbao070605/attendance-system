@@ -453,28 +453,31 @@
     }
 
     function redirectToAppsScriptForm(formData) {
-      if (!APPS_SCRIPT_FORM_URL || APPS_SCRIPT_FORM_URL.includes("DAN_LINK_APPS_SCRIPT_EXEC_CUA_BAN")) {
-        showMessage("error", "Bạn chưa cấu hình link Apps Script Web App trong file index.html.");
-        submitBtn.disabled = false;
-        form.classList.remove("loading");
-        return;
+        if (
+          !APPS_SCRIPT_FORM_URL ||
+          APPS_SCRIPT_FORM_URL === "DAN_LINK_APPS_SCRIPT_EXEC_CUA_BAN"
+        ) {
+          showMessage("error", "Bạn chưa cấu hình link Apps Script Web App trong file index.html.");
+          submitBtn.disabled = false;
+          form.classList.remove("loading");
+          return;
+        }
+    
+        const params = new URLSearchParams({
+          source: "github",
+          employeeID: formData.employeeID,
+          fullName: formData.fullName,
+          department: formData.department,
+          requestType: formData.requestType,
+          requestDate: formData.requestDate,
+          outTime: formData.outTime,
+          inTime: formData.inTime,
+          reason: formData.reason,
+          note: formData.note
+        });
+    
+        window.location.href = APPS_SCRIPT_FORM_URL + "?" + params.toString();
       }
-
-      const params = new URLSearchParams({
-        source: "github",
-        employeeID: formData.employeeID,
-        fullName: formData.fullName,
-        department: formData.department,
-        requestType: formData.requestType,
-        requestDate: formData.requestDate,
-        outTime: formData.outTime,
-        inTime: formData.inTime,
-        reason: formData.reason,
-        note: formData.note
-      });
-
-      window.location.href = APPS_SCRIPT_FORM_URL + "?" + params.toString();
-    }
 
     function submitThroughAppsScript(formData) {
       google.script.run
